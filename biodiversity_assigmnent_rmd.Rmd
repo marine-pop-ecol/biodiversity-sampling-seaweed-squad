@@ -1,0 +1,27 @@
+---
+title: "Biodiversity_Assignment"
+author: "Jonathan Farr"
+date: "10/31/2021"
+output: html_document
+---
+
+
+Setting up our packages
+```{r setup, include=FALSE}
+library(vegan)
+library(tidyverse)
+
+quadrat = read.csv("quadrat_data.csv")
+biodiversity = read.csv("biodiversity.csv")
+perc = read.csv("percent_cover.csv")
+
+```
+
+calculating richness per quadrat
+```{r}
+quad_richness <- biodiversity %>%
+  drop_na(n) %>%
+  group_by(vertical_transect,quadrat) %>%
+  summarize(n_spp = length(unique(species)))
+```
+
