@@ -10,18 +10,115 @@ Setting up our packages
 ```{r setup, include=FALSE}
 library(vegan)
 library(tidyverse)
-
+library(labdsv)
+library(performance) 
+library(LambertW)
 quadrat = read.csv("quadrat_data.csv")
+quadrat = quadrat[-c(21:997),]
 biodiversity = read.csv("biodiversity.csv")
+biodiversity = biodiversity[-c(357:979),]
 perc = read.csv("percent_cover.csv")
+```
+
+Seaweed percentages
+```{r}
+seaweeds = perc %>%
+    group_by(vertical_transect, quadrat) %>%
+  mutate(unique_ID = as.numeric( paste0(vertical_transect, ".", quadrat))) %>%
+  select(c(unique_ID, quadrat, per_upright, per_crust)) %>%
+  arrange(unique_ID)
+
+seaweeds_clean = data.frame(seaweeds[,-c(1,3)])
+
+
+# setting up our dataframe so that we can use matrify to arrange
+#our data in long form and  then calculate diversity with vegan 
+cleaned_biodiversity = biodiversity %>% # cleaning data to use matrify
+    drop_na(n) %>%
+    group_by(vertical_transect, quadrat) %>%
+  mutate(unique_ID = as.numeric( paste0(vertical_transect, ".", quadrat))) %>%
+  select(unique_ID, species, n)
+
+cleaned_biodiversity = data.frame(cleaned_biodiversity[,-c(1:2)]) # removing extra columns
+
+# putting it into a matrix format
+biodiversity_matrix <- matrify(cleaned_biodiversity) # using matrify
 
 ```
 
-calculating richness per quadrat
+Calculating diversity indices and linking it to seaweed cover
 ```{r}
-quad_richness <- biodiversity %>%
+
+ShannonIndex <- data.frame(
+  diversity(biodiversity_matrix, index = "shannon"))
+head(ShannonIndex)
+ShannonIndex = ShannonIndex %>%
+  rename("ShannonIndex" = diversity.biodiversity_matrix..index....shannon..)
+
+richness <- biodiversity %>% # calculating richness per quadrat
   drop_na(n) %>%
   group_by(vertical_transect,quadrat) %>%
-  summarize(n_spp = length(unique(species)))
+  summarize(rich = length(unique(species)))   %>%
+  mutate(unique_ID = as.numeric( paste0(vertical_transect, ".", quadrat)))
+
+Data = cbind(ShannonIndex, seaweeds_clean, richness[,3]) # comining all our data
 ```
+
+Now, we plot the relationship between diversity and seaweed cover using ggplot and geom_point
+```{r}
+
+# visualizing upright percent cover and diversity
+ggplot(data = Data, aes(x=per_upright, y =ShannonIndex))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)
+
+# visualizing crust percent cover and diversity
+ggplot(data = Data, aes(x=per_crust, y =ShannonIndex))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)
+
+# visualizing upright percent cover and richness
+ggplot(data = Data, aes(x=per_upright, y =rich))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)
+
+# visualizing crust percent cover and richness
+ggplot(data = Data, aes(x=per_crust, y =rich))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)
+
+
+
+```
+
+Using regression to examine the relationships between seaweed % cover and shannon weiner diversity
+```{r}
+# simple linear regression for upright and diversity
+upright_diversity = lm(ShannonIndex ~ per_upright, data = Data)
+summary(upright_diversity) # not significant
+check_model(upright_diversity) # our model isn't perfect but it'll do donkey, it'll do 
+
+# simple linear regression for crust and diversity
+crust_diversity = lm(ShannonIndex ~ per_crust, data = Data)
+summary(crust_diversity) # not significant
+check_model(crust_diversity) # our model isn't perfect but it'll do donkey, it'll do 
+
+# simple linear regression for upright and richness
+upright_rich = lm(rich ~ per_upright, data = Data)
+summary(upright_rich) # not significant
+check_model(upright_rich) # our model isn't perfect but it'll do donkey, it'll do 
+
+# simple linear regression for crust and richness
+crust_rich = lm(rich ~ per_crust, data = Data)
+summary(crust_rich) # not significant
+check_model(crust_rich) # our model isn't perfect but it'll do donkey, it'll do 
+
+
+# we have no significant results (teehee) but that's ok! science
+
+
+```
+
+
+
 
