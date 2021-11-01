@@ -92,31 +92,26 @@ ggplot(data = Data, aes(x=per_crust, y =rich))+
 ```
 
 Using regression to examine the relationships between seaweed % cover and shannon weiner diversity
+We used poission distribution because it's more appropriate for data that's never negative
 ```{r}
 # simple linear regression for upright and diversity
 upright_diversity = lm(ShannonIndex ~ per_upright, data = Data)
 summary(upright_diversity) # not significant
-check_model(upright_diversity) # our model isn't perfect but it'll do donkey, it'll do 
 
 # simple linear regression for crust and diversity
 crust_diversity = lm(ShannonIndex ~ per_crust, data = Data)
 summary(crust_diversity) # not significant
-check_model(crust_diversity) # our model isn't perfect but it'll do donkey, it'll do 
+
 
 # simple linear regression for upright and richness
 upright_rich = lm(rich ~ per_upright, data = Data)
 summary(upright_rich) # not significant
-check_model(upright_rich) # our model isn't perfect but it'll do donkey, it'll do 
 
 # simple linear regression for crust and richness
 crust_rich = lm(rich ~ per_crust, data = Data)
 summary(crust_rich) # not significant
-check_model(crust_rich) # our model isn't perfect but it'll do donkey, it'll do 
-
 
 # we have no significant results (teehee) but that's ok! science
-
-
 ```
 
 
