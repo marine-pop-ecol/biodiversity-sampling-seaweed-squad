@@ -169,7 +169,7 @@ table = data.frame(Analysis = c("Shannon-Wiener Index", "Shannon-Wiener Index", 
                    "P-Value" = c("0.1433", "0.6993", "0.2085", "0.9387"), 
                    "Adjusted R-squared" = c("0.06596", "-0.0466", "0.03562", "-0.0552"))
 
-knitr::kable(table, caption= "Table 1. Linear regression results of the relationship between algae morphology and both Shannon-Wiener Index and Richness")
+knitr::kable(table, caption= "Linear regression results of the relationship between algae morphology and both Shannon-Wiener Index and Richness")
 
 
 
