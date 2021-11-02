@@ -20,12 +20,31 @@ biodiversity = biodiversity[-c(357:979),]
 perc = read.csv("percent_cover.csv")
 ```
 
+## Question
+
+How does percent-cover of upright and crust seaweeds affect intertidal invertebrate diversity?
+
+## Hypothesis
+
+If an area has a higher percent cover of upright seaweeds, then intertidal diversity will be higher because they provide microhabitats and are recruiters.  
+
+## Data Collection and Data Type
+
+At Scott's Bay, we placed two transects parallel to the shoreline with one wave exposed and the other wave-sheltered. On each transect, we surveyed three locations using 3-4 quadrats per location to record the following: percent cover of upright algae, percent cover of crustose algae, and the species abundance of invertebrates (down to the lowest taxa possible). 
+
+## Analysis Summary
+
+We calculated the species richness and diversity (using the Shannon-Wiener index) of quadrates compared to percent cover of upright algae and crustose algae.  We then performed a simple linear regression to see if percent cover of crustose or upright algae has a significant effect on diversity and richness.
+
+## Results
+
+### Calculations
 Seaweed percentages
 ```{r}
 seaweeds = perc %>%
     group_by(vertical_transect, quadrat) %>%
   mutate(unique_ID = as.numeric( paste0(vertical_transect, ".", quadrat))) %>%
-  select(c(unique_ID, quadrat, per_upright, per_crust)) %>%
+  dplyr::select(c(unique_ID, quadrat, per_upright, per_crust)) %>%
   arrange(unique_ID)
 
 seaweeds_clean = data.frame(seaweeds[,-c(1,3)])
@@ -37,7 +56,7 @@ cleaned_biodiversity = biodiversity %>% # cleaning data to use matrify
     drop_na(n) %>%
     group_by(vertical_transect, quadrat) %>%
   mutate(unique_ID = as.numeric( paste0(vertical_transect, ".", quadrat))) %>%
-  select(unique_ID, species, n)
+  dplyr::select(unique_ID, species, n)
 
 cleaned_biodiversity = data.frame(cleaned_biodiversity[,-c(1:2)]) # removing extra columns
 
@@ -68,28 +87,54 @@ Now, we plot the relationship between diversity and seaweed cover using ggplot a
 ```{r}
 
 # visualizing upright percent cover and diversity
-ggplot(data = Data, aes(x=per_upright, y =ShannonIndex))+ 
+figure1<-ggplot(data = Data, aes(x=per_upright, y =ShannonIndex))+ 
   geom_point()+
-  geom_smooth(method=lm, se=FALSE)
+  geom_smooth(method=lm, se=FALSE)+
+  labs(x="Percent cover of upright algae (%)", y="Shannon-Wiener index")
 
 # visualizing crust percent cover and diversity
-ggplot(data = Data, aes(x=per_crust, y =ShannonIndex))+ 
+figure2<-ggplot(data = Data, aes(x=per_crust, y =ShannonIndex))+ 
   geom_point()+
-  geom_smooth(method=lm, se=FALSE)
+  geom_smooth(method=lm, se=FALSE)+
+  labs(x="Percent cover of crustose algae (%)", y="Shannon-Wiener index")
 
 # visualizing upright percent cover and richness
-ggplot(data = Data, aes(x=per_upright, y =rich))+ 
+figure3<-ggplot(data = Data, aes(x=per_upright, y =rich))+ 
   geom_point()+
-  geom_smooth(method=lm, se=FALSE)
+  geom_smooth(method=lm, se=FALSE)+
+  labs(x="Percent cover of upright algae", y="Richness")
 
 # visualizing crust percent cover and richness
-ggplot(data = Data, aes(x=per_crust, y =rich))+ 
+figure4 <- ggplot(data = Data, aes(x=per_crust, y =rich))+ 
   geom_point()+
-  geom_smooth(method=lm, se=FALSE)
+  geom_smooth(method=lm, se=FALSE)+
+  labs(x="Percent cover of crustose algae", y="Richness")
 
 
-
+figure1
 ```
+
+Figure 1. The impact of percent cover of upright algae on the diversity of marine invertebrates (as calculated by the Shannon-Wiener Index)
+
+```{r}
+figure2
+```
+
+Figure 2. The impact of percent cover of crustose algae on the diversity of marine invertebrates (as calculated by the Shannon-Wiener Index)
+
+```{r}
+figure3
+```
+
+Figure 3. The impact of percent cover of crustose algae on the richness of marine invertebrates (as calculated by the Shannon-Wiener Index)
+
+```{r}
+figure4
+```
+
+Figure 4. The impact of percent cover of crustose algae on the richness of marine invertebrates (as calculated by the Shannon-Wiener Index)
+
+### Linear Regression
 
 Using regression to examine the relationships between seaweed % cover and shannon weiner diversity
 We used poission distribution because it's more appropriate for data that's never negative
@@ -114,6 +159,8 @@ summary(crust_rich) # not significant
 # we have no significant results (teehee) but that's ok! science
 ```
 
+## Conclusions
 
+As none of the p-values are less than 0.05, there is no significant relationship between algae type and both diversity and richness.
 
 
