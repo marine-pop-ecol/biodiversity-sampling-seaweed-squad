@@ -1,8 +1,10 @@
 ---
 title: "Biodiversity_Assignment"
-author: "Jonathan Farr"
+author: "Jonathan Farr, Payton Arthur, Sammie Foley, and Jules Jones"
 date: "10/31/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -25,7 +27,7 @@ Seaweed percentages
 seaweeds = perc %>%
     group_by(vertical_transect, quadrat) %>%
   mutate(unique_ID = as.numeric( paste0(vertical_transect, ".", quadrat))) %>%
-  select(c(unique_ID, quadrat, per_upright, per_crust)) %>%
+  dplyr::select(c(unique_ID, quadrat, per_upright, per_crust)) %>%
   arrange(unique_ID)
 
 seaweeds_clean = data.frame(seaweeds[,-c(1,3)])
@@ -37,7 +39,7 @@ cleaned_biodiversity = biodiversity %>% # cleaning data to use matrify
     drop_na(n) %>%
     group_by(vertical_transect, quadrat) %>%
   mutate(unique_ID = as.numeric( paste0(vertical_transect, ".", quadrat))) %>%
-  select(unique_ID, species, n)
+  dplyr::select(unique_ID, species, n)
 
 cleaned_biodiversity = data.frame(cleaned_biodiversity[,-c(1:2)]) # removing extra columns
 
@@ -68,28 +70,38 @@ Now, we plot the relationship between diversity and seaweed cover using ggplot a
 ```{r}
 
 # visualizing upright percent cover and diversity
-ggplot(data = Data, aes(x=per_upright, y =ShannonIndex))+ 
+p1 = ggplot(data = Data, aes(x=per_upright, y =ShannonIndex))+ 
   geom_point()+
   geom_smooth(method=lm, se=FALSE)
 
 # visualizing crust percent cover and diversity
-ggplot(data = Data, aes(x=per_crust, y =ShannonIndex))+ 
+p2 = ggplot(data = Data, aes(x=per_crust, y =ShannonIndex))+ 
   geom_point()+
   geom_smooth(method=lm, se=FALSE)
 
 # visualizing upright percent cover and richness
-ggplot(data = Data, aes(x=per_upright, y =rich))+ 
+p3 = ggplot(data = Data, aes(x=per_upright, y =rich))+ 
   geom_point()+
   geom_smooth(method=lm, se=FALSE)
 
 # visualizing crust percent cover and richness
-ggplot(data = Data, aes(x=per_crust, y =rich))+ 
+p4 = ggplot(data = Data, aes(x=per_crust, y =rich))+ 
   geom_point()+
   geom_smooth(method=lm, se=FALSE)
 
 
 
 ```
+
+```{r}
+ggsave(plot = p1, filename = "upright_diversity.pdf")
+ggsave(plot = p2, filename = "crustose_diversity.pdf")
+ggsave(plot = p3, filename = "upright_richness.pdf")
+ggsave(plot = p4, filename = "crustoes_richness.pdf")
+```
+
+
+
 
 Using regression to examine the relationships between seaweed % cover and shannon weiner diversity
 We used poission distribution because it's more appropriate for data that's never negative
@@ -115,5 +127,17 @@ summary(crust_rich) # not significant
 ```
 
 
+```{r, echo=FALSE}
 
+
+table = data.frame(Analysis = c("Shannon-Wiener Index", "Shannon-Wiener Index", "Richness", "Richness"), 
+                   "Algae Type" = c("upright", "crustose", "upright", "crustose"), 
+                   "P-Value" = c("0.1433", "0.6993", "0.2085", "0.9387"), 
+                   "Adjusted R-squared" = c("0.06596", "-0.0466", "0.03562", "-0.0552"))
+
+knitr::kable(table, caption= "Table 1. Linear regression results of the relationship between algae morphology and both Shannon-Wiener Index and Richness")
+
+
+
+```
 
